@@ -1,0 +1,145 @@
+﻿from fastapi import APIRouter, HTTPException, status
+
+from app.core.security import get_password_hash, verify_password
+from app.core.supabase_client import get_supabase_admin_client
+from app.schemas.auth import (
+    AuthSuccessResponse,
+    AuthUserResponse,
+    LoginRequest,
+    RegisterRequest,
+    UpdateProfileRequest,
+)
+
+router = APIRouter(prefix="/auth", tags=["auth"])
+
+
+def normalize_profile(tipo_usuario: str | None) -> str:
+    value = str(tipo_usuario or "").strip().lower()
+    if value in {"tecnico", "tecnico_profesional"}:
+        return "tecnico"
+    return "oficial"
+
+
+def to_auth_user(row: dict) -> AuthUserResponse:
+    return AuthUserResponse(
+        id=str(row.get("id") or ""),
+        nombre=str(row.get("nombre") or "Usuario Quantia"),
+        email=row.get("email") or "",
+        telefono=row.get("telefono"),
+        profesion=row.get("profesion"),
+        alias=row.get("alias"),
+        direccion=row.get("direccion"),
+        perfil=normalize_profile(row.get("perfil")),
+    )
+
+
+@router.post("/register", response_model=AuthSuccessResponse)
+def register_user(payload: RegisterRequest):
+    client = get_supabase_admin_client()
+    email = str(payload.email).strip().lower()
+
+    existing = client.table("app_users").select("id,email").eq("email", email).limit(1).execute()
+    if existing.data:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="El correo ya esta registrado.",
+        )
+
+    insert_payload = {
+        "nombre": payload.nombre.strip(),
+        "email": email,
+        "telefono": (payload.telefono or "").strip() or None,
+        "profesion": (payload.profesion or "").strip() or None,
+        "alias": (payload.alias or "").strip() or None,
+        "direccion": (payload.direccion or "").strip() or None,
+        "perfil": normalize_profile(payload.tipo_usuario),
+        "password_hash": get_password_hash(payload.password),
+        "is_active": True,
+    }
+    created = client.table("app_users").insert(insert_payload).execute()
+    if not created.data:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="No se pudo crear el usuario.")
+
+    return {"ok": True, "user": to_auth_user(created.data[0])}
+
+
+@router.post("/login", response_model=AuthSuccessResponse)
+def login_user(payload: LoginRequest):
+    client = get_supabase_admin_client()
+    email = str(payload.email).strip().lower()
+
+    result = (
+        client.table("app_users")
+        .select("id,nombre,email,telefono,profesion,alias,direccion,perfil,password_hash,is_active")
+        .eq("email", email)
+        .limit(1)
+        .execute()
+    )
+
+    if not result.data:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Credenciales invalidas.")
+
+    row = result.data[0]
+    if not row.get("is_active", True):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Usuario inactivo.")
+
+    if not verify_password(payload.password, str(row.get("password_hash") or "")):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Credenciales invalidas.")
+
+    return {"ok": True, "user": to_auth_user(row)}
+
+
+@router.post("/profile/update", response_model=AuthSuccessResponse)
+def update_profile(payload: UpdateProfileRequest):
+    client = get_supabase_admin_client()
+    user_id = str(payload.user_id or "").strip()
+    email = str(payload.email or "").strip().lower()
+
+    query = client.table("app_users").select(
+        "id,nombre,email,telefono,profesion,alias,direccion,perfil,is_active"
+    )
+    if user_id:
+        query = query.eq("id", user_id)
+    else:
+        query = query.eq("email", email)
+
+    found = query.limit(1).execute()
+    if not found.data:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Usuario no encontrado.")
+
+    row = found.data[0]
+    target_id = str(row.get("id") or "").strip()
+    if not target_id:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Usuario sin id valido.")
+
+    update_payload = {
+        "perfil": normalize_profile(payload.tipo_usuario),
+    }
+
+    if payload.nombre is not None:
+        update_payload["nombre"] = payload.nombre.strip()
+    if payload.telefono is not None:
+        update_payload["telefono"] = (payload.telefono or "").strip() or None
+    if payload.profesion is not None:
+        update_payload["profesion"] = (payload.profesion or "").strip() or None
+    if payload.alias is not None:
+        update_payload["alias"] = (payload.alias or "").strip() or None
+    if payload.direccion is not None:
+        update_payload["direccion"] = (payload.direccion or "").strip() or None
+
+    client.table("app_users").update(update_payload).eq("id", target_id).execute()
+
+    refreshed = (
+        client.table("app_users")
+        .select("id,nombre,email,telefono,profesion,alias,direccion,perfil,is_active")
+        .eq("id", target_id)
+        .limit(1)
+        .execute()
+    )
+    if not refreshed.data:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="No se pudo recuperar el usuario actualizado.",
+        )
+
+    return {"ok": True, "user": to_auth_user(refreshed.data[0])}
