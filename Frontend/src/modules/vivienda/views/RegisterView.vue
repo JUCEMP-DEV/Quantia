@@ -171,10 +171,10 @@
 import { reactive, ref } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
+import { API_BASE_URL } from "@/config/apiBaseUrl"
 
 const router = useRouter()
 const authStore = useAuthStore()
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api"
 
 const loading = ref(false)
 const showPassword = ref(false)

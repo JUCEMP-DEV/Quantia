@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api";
+import { API_BASE_URL } from "@/config/apiBaseUrl";
 const REQUEST_TIMEOUT_MS = 15000;
 
 async function postJson(url, payload = {}) {

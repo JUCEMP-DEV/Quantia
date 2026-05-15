@@ -3,8 +3,8 @@ import {
   buildInferenceSnapshotAudit,
   normalizeInferenceSnapshot,
 } from "@/modules/vivienda/services/inferenciaSnapshotService";
+import { API_BASE_URL } from "@/config/apiBaseUrl";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api";
 const REQUEST_TIMEOUT_MS = 10000;
 
 export async function inferirResultadoV4({

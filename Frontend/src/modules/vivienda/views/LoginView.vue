@@ -140,11 +140,11 @@ import { useRouter } from "vue-router";
 import LogoQuantia from "@/components/common/LogoQuantia.vue";
 import { useAuthStore } from "@/stores/authStore";
 import { useViviendaStore } from "@/modules/vivienda/store/viviendaStore";
+import { API_BASE_URL } from "@/config/apiBaseUrl";
 
 const router = useRouter();
 const authStore = useAuthStore();
 const viviendaStore = useViviendaStore();
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api";
 
 const showPassword = ref(false);
 const loading = ref(false);

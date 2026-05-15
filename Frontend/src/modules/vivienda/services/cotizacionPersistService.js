@@ -2,8 +2,7 @@ import {
   buildRawInferenceSnapshot,
   normalizeInferenceSnapshot,
 } from "@/modules/vivienda/services/inferenciaSnapshotService";
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api";
+import { API_BASE_URL } from "@/config/apiBaseUrl";
 
 function toNumber(value, fallback = 0) {
   const parsed = Number(value);
