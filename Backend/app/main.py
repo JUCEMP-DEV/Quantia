@@ -27,6 +27,10 @@ app.include_router(api_router, prefix=settings.api_v1_prefix)
 def health():
     return {"ok": True, "service": settings.project_name}
 
+@app.get("/")
+def root():
+    return {"message": "Backend Quantia funcionando"}
+
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
