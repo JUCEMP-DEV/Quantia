@@ -1,7 +1,4 @@
-const BACKEND_URL = String(import.meta.env.VITE_BACKEND_URL || "")
-  .trim()
-  .replace(/\/+$/, "");
-const API_BASE_URL = BACKEND_URL ? `${BACKEND_URL}/api` : "/api";
+import { API_BASE_URL } from "@/config/apiBaseUrl";
 const REQUEST_TIMEOUT_MS = 15000;
 
 async function postJson(url, payload = {}) {
@@ -39,7 +36,7 @@ export async function simularPreliminaresBackend({
   colindanciasRecorrido = {},
   sourceName = "CONSTRUBASE_PU_48_CONSTRUCTOR",
 } = {}) {
-  return postJson(`${API_BASE_URL}/motor/preliminares/simular`, {
+  return postJson(`${API_BASE_URL}/api/motor/preliminares/simular`, {
     preliminares,
     datosGeneralesObra,
     estructuraEspacial,
@@ -63,7 +60,7 @@ export async function simularModuloBackend({
     throw new Error("moduleKey es requerido para simular modulo en backend.");
   }
 
-  return postJson(`${API_BASE_URL}/motor/modulos/${moduleKey}/simular`, {
+  return postJson(`${API_BASE_URL}/api/motor/modulos/${moduleKey}/simular`, {
     controles,
     selectedConceptKeys,
     forceSelectAll,

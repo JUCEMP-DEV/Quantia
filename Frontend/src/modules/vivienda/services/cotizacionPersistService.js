@@ -146,7 +146,7 @@ export async function saveCotizacionSnapshot({
     total: toNumber(inferredResult?.resultadoFinal || 0),
   };
 
-  const response = await fetch(`${API_BASE_URL}/cotizaciones`, {
+  const response = await fetch(`${API_BASE_URL}/api/cotizaciones`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
