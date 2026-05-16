@@ -1,4 +1,7 @@
-import { API_BASE_URL } from "@/config/apiBaseUrl";
+const BACKEND_URL = String(import.meta.env.VITE_BACKEND_URL || "")
+  .trim()
+  .replace(/\/+$/, "");
+const API_BASE_URL = BACKEND_URL ? `${BACKEND_URL}/api` : "/api";
 const REQUEST_TIMEOUT_MS = 15000;
 
 async function postJson(url, payload = {}) {
