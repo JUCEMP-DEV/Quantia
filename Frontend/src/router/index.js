@@ -6,7 +6,7 @@ import { useViviendaStore } from "@/modules/vivienda/store/viviendaStore";
 const routes = [
   {
     path: "/",
-    redirect: "/vivienda/landing",
+    redirect: "/vivienda/login",
   },
   ...viviendaRoutes,
 ];
