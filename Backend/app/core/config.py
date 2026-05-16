@@ -25,8 +25,13 @@ class Settings(BaseSettings):
 
     backend_cors_origins: list[str] = Field(
         default_factory=lambda: [
-            "https://quantia-a1xhwbrob-jucemp-devs-projects.vercel.app",
-                  ]
+            "http://localhost:5173",
+            "http://127.0.0.1:5173",
+        ]
+    )
+    backend_cors_origin_regex: str | None = Field(
+        default=r"^https://([a-z0-9-]+\.)*vercel\.app$",
+        alias="BACKEND_CORS_ORIGIN_REGEX",
     )
 
     @field_validator("backend_cors_origins", mode="before")
@@ -40,6 +45,16 @@ class Settings(BaseSettings):
                 return []
             return [item.strip() for item in value.split(",") if item.strip()]
         return []
+
+    @field_validator("backend_cors_origin_regex", mode="before")
+    @classmethod
+    def parse_cors_origin_regex(cls, value):  # noqa: ANN001
+        if value is None:
+            return None
+        if isinstance(value, str):
+            value = value.strip()
+            return value or None
+        return None
 
     @field_validator("debug", mode="before")
     @classmethod

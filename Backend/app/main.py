@@ -11,10 +11,11 @@ app = FastAPI(
     redoc_url="/redoc",
 )
 
-if settings.backend_cors_origins:
+if settings.backend_cors_origins or settings.backend_cors_origin_regex:
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.backend_cors_origins,
+        allow_origin_regex=settings.backend_cors_origin_regex,
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
@@ -26,6 +27,7 @@ app.include_router(api_router, prefix=settings.api_v1_prefix)
 @app.get("/health")
 def health():
     return {"ok": True, "service": settings.project_name}
+
 
 @app.get("/")
 def root():
