@@ -25,12 +25,8 @@ class Settings(BaseSettings):
 
     backend_cors_origins: list[str] = Field(
         default_factory=lambda: [
-            "http://localhost:5173",
-            "http://127.0.0.1:5173",
-            "https://quantia-dun.vercel.app",
-            "https://quantia-git-main-jucemp-devs-projects.vercel.app",
-            "https://quantia-p3tt1813g-jucemp-devs-projects.vercel.app",
-        ]
+            "https://quantia-g8k2.onrender.com",
+                  ]
     )
 
     @field_validator("backend_cors_origins", mode="before")
