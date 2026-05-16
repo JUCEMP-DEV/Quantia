@@ -25,7 +25,7 @@ class Settings(BaseSettings):
 
     backend_cors_origins: list[str] = Field(
         default_factory=lambda: [
-            "https://quantia-g8k2.onrender.com",
+            "https://quantia-kappa.vercel.app/",
                   ]
     )
 
