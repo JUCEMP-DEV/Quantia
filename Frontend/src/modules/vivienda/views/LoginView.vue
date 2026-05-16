@@ -256,14 +256,7 @@ async function handleContinue() {
   serverMessage.value = "";
 
   try {
-    let authenticatedUser;
-    try {
-      authenticatedUser = await authenticateAgainstBackend();
-    } catch (backendError) {
-      authenticatedUser = authenticateAgainstLocalFallback();
-      serverMessage.value = `${backendError.message} Se aplicó validación local de respaldo.`;
-    }
-
+    const authenticatedUser = await authenticateAgainstBackend();
     authStore.setAccessProfile(authenticatedUser.perfil);
     authStore.setUser(authenticatedUser);
     viviendaStore.startSimulation({

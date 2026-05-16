@@ -21,11 +21,15 @@ class Settings(BaseSettings):
     supabase_url: str = Field(default="", alias="SUPABASE_URL")
     supabase_anon_key: str = Field(default="", alias="SUPABASE_ANON_KEY")
     supabase_service_role_key: str = Field(default="", alias="SUPABASE_SERVICE_ROLE_KEY")
+    supabase_key: str = Field(default="", alias="SUPABASE_KEY")
 
     backend_cors_origins: list[str] = Field(
         default_factory=lambda: [
             "http://localhost:5173",
             "http://127.0.0.1:5173",
+            "https://quantia-dun.vercel.app",
+            "https://quantia-git-main-jucemp-devs-projects.vercel.app",
+            "https://quantia-p3tt1813g-jucemp-devs-projects.vercel.app",
         ]
     )
 
@@ -56,7 +60,7 @@ class Settings(BaseSettings):
 
     @property
     def supabase_admin_key(self) -> str:
-        return self.supabase_service_role_key or self.supabase_anon_key
+        return self.supabase_service_role_key or self.supabase_key or self.supabase_anon_key
 
 
 @lru_cache
