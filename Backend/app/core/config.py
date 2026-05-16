@@ -25,7 +25,7 @@ class Settings(BaseSettings):
 
     backend_cors_origins: list[str] = Field(
         default_factory=lambda: [
-            "https://quantia-kappa.vercel.app/",
+            "https://quantia-a1xhwbrob-jucemp-devs-projects.vercel.app",
                   ]
     )
 
