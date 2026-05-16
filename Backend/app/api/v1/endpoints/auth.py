@@ -12,12 +12,33 @@ from app.schemas.auth import (
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
+USERS_TABLE = "app_users"
+MAX_BCRYPT_PASSWORD_BYTES = 72
+
 
 def normalize_profile(tipo_usuario: str | None) -> str:
     value = str(tipo_usuario or "").strip().lower()
     if value in {"tecnico", "tecnico_profesional"}:
         return "tecnico"
     return "oficial"
+
+
+def normalize_password(password: str | None) -> str:
+    password_value = str(password or "")
+
+    if not password_value:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="La contraseña es obligatoria.",
+        )
+
+    if len(password_value.encode("utf-8")) > MAX_BCRYPT_PASSWORD_BYTES:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="La contraseña no puede superar 72 bytes.",
+        )
+
+    return password_value
 
 
 def to_auth_user(row: dict) -> AuthUserResponse:
@@ -37,8 +58,9 @@ def to_auth_user(row: dict) -> AuthUserResponse:
 def register_user(payload: RegisterRequest):
     client = get_supabase_admin_client()
     email = str(payload.email).strip().lower()
+    password = normalize_password(payload.password)
 
-    existing = client.table("app_users").select("id,email").eq("email", email).limit(1).execute()
+    existing = client.table(USERS_TABLE).select("id,email").eq("email", email).limit(1).execute()
     if existing.data:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
@@ -53,12 +75,16 @@ def register_user(payload: RegisterRequest):
         "alias": (payload.alias or "").strip() or None,
         "direccion": (payload.direccion or "").strip() or None,
         "perfil": normalize_profile(payload.tipo_usuario),
-        "password_hash": get_password_hash(payload.password),
+        "password_hash": get_password_hash(password),
         "is_active": True,
     }
-    created = client.table("app_users").insert(insert_payload).execute()
+
+    created = client.table(USERS_TABLE).insert(insert_payload).execute()
     if not created.data:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="No se pudo crear el usuario.")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="No se pudo crear el usuario.",
+        )
 
     return {"ok": True, "user": to_auth_user(created.data[0])}
 
@@ -67,9 +93,10 @@ def register_user(payload: RegisterRequest):
 def login_user(payload: LoginRequest):
     client = get_supabase_admin_client()
     email = str(payload.email).strip().lower()
+    password = normalize_password(payload.password)
 
     result = (
-        client.table("app_users")
+        client.table(USERS_TABLE)
         .select("id,nombre,email,telefono,profesion,alias,direccion,perfil,password_hash,is_active")
         .eq("email", email)
         .limit(1)
@@ -83,7 +110,7 @@ def login_user(payload: LoginRequest):
     if not row.get("is_active", True):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Usuario inactivo.")
 
-    if not verify_password(payload.password, str(row.get("password_hash") or "")):
+    if not verify_password(password, str(row.get("password_hash") or "")):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Credenciales invalidas.")
 
     return {"ok": True, "user": to_auth_user(row)}
@@ -95,9 +122,10 @@ def update_profile(payload: UpdateProfileRequest):
     user_id = str(payload.user_id or "").strip()
     email = str(payload.email or "").strip().lower()
 
-    query = client.table("app_users").select(
+    query = client.table(USERS_TABLE).select(
         "id,nombre,email,telefono,profesion,alias,direccion,perfil,is_active"
     )
+
     if user_id:
         query = query.eq("id", user_id)
     else:
@@ -127,15 +155,16 @@ def update_profile(payload: UpdateProfileRequest):
     if payload.direccion is not None:
         update_payload["direccion"] = (payload.direccion or "").strip() or None
 
-    client.table("app_users").update(update_payload).eq("id", target_id).execute()
+    client.table(USERS_TABLE).update(update_payload).eq("id", target_id).execute()
 
     refreshed = (
-        client.table("app_users")
+        client.table(USERS_TABLE)
         .select("id,nombre,email,telefono,profesion,alias,direccion,perfil,is_active")
         .eq("id", target_id)
         .limit(1)
         .execute()
     )
+
     if not refreshed.data:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
