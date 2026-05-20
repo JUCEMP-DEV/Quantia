@@ -3,7 +3,7 @@
     <div class="register-wrapper">
       <section class="register-card">
         <div class="brand-block">
-          <h1>Quantia</h1>
+          <LogoQuantia class="brand-logo" />
           <p>
             Crea tu cuenta para comenzar a generar cotizaciones y estimaciones
             de obra de forma más ordenada.
@@ -172,6 +172,7 @@ import { reactive, ref } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
 import { API_BASE_URL } from "@/config/apiBaseUrl"
+import LogoQuantia from "@/components/common/LogoQuantia.vue"
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -404,12 +405,11 @@ async function handleRegister() {
   display: flex;
   flex-direction: column;
   justify-content: center;
+  gap: 18px;
 }
 
-.brand-block h1 {
-  font-size: 2.4rem;
-  margin-bottom: 16px;
-  font-weight: 800;
+.brand-logo {
+  align-self: flex-start;
 }
 
 .brand-block p {

@@ -1,12 +1,26 @@
 <template>
-  <div class="logo-quantia">
-    <div class="logo-icon">
-      <div class="bar bar-1"></div>
-      <div class="bar bar-2"></div>
-      <div class="bar bar-3"></div>
-      <div class="bar bar-4"></div>
-    </div>
+  <div class="logo-quantia" role="img" aria-label="Quantia Vivienda">
+    <svg class="logo-mark" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="q-ring" x1="18" y1="20" x2="102" y2="108" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stop-color="#45D7FF" />
+          <stop offset="58%" stop-color="#4E7FFF" />
+          <stop offset="100%" stop-color="#A947FF" />
+        </linearGradient>
+        <linearGradient id="q-bars" x1="40" y1="50" x2="74" y2="92" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stop-color="#61E7FF" />
+          <stop offset="100%" stop-color="#8D56FF" />
+        </linearGradient>
+      </defs>
 
+      <circle cx="56" cy="56" r="36" fill="none" stroke="url(#q-ring)" stroke-width="9" stroke-linecap="round" />
+      <path d="M79 81 L102 103" fill="none" stroke="url(#q-ring)" stroke-width="9" stroke-linecap="round" />
+
+      <path d="M34 57 L56 41 L78 57" fill="none" stroke="url(#q-ring)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" />
+      <rect x="42" y="74" width="9" height="11" rx="2.5" fill="url(#q-bars)" />
+      <rect x="56" y="66" width="9" height="19" rx="2.5" fill="url(#q-bars)" />
+      <rect x="70" y="57" width="9" height="28" rx="2.5" fill="url(#q-bars)" />
+    </svg>
     <div class="logo-text">
       <strong>Quantia</strong>
       <span>Vivienda</span>
@@ -18,43 +32,14 @@
 .logo-quantia {
   display: inline-flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
 }
 
-.logo-icon {
-  width: 62px;
-  height: 62px;
-  border-radius: 20px;
-  position: relative;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  gap: 4px;
-  padding: 10px 11px;
-  background: linear-gradient(135deg, rgba(88, 220, 255, 0.28), rgba(134, 73, 255, 0.32));
-  border: 2px solid rgba(255,255,255,0.2);
-  box-shadow: inset 0 0 18px rgba(255,255,255,0.08);
+.logo-mark {
+  width: 88px;
+  height: 88px;
+  filter: drop-shadow(0 8px 20px rgba(67, 179, 255, 0.22));
 }
-
-.logo-icon::before {
-  content: "";
-  position: absolute;
-  inset: -6px;
-  border-radius: 24px;
-  border: 2px solid rgba(140, 233, 255, 0.45);
-}
-
-.bar {
-  width: 7px;
-  border-radius: 999px;
-  background: linear-gradient(180deg, #8fe8ff 0%, #8b5cf6 100%);
-  box-shadow: 0 0 12px rgba(143, 232, 255, 0.3);
-}
-
-.bar-1 { height: 15px; }
-.bar-2 { height: 24px; }
-.bar-3 { height: 33px; }
-.bar-4 { height: 42px; }
 
 .logo-text {
   display: flex;
@@ -63,16 +48,25 @@
 }
 
 .logo-text strong {
-  font-size: 2.1rem;
+  font-size: clamp(1.7rem, 1.2rem + 1.2vw, 2.4rem);
   color: #ffffff;
-  font-weight: 800;
+  font-weight: 900;
   letter-spacing: -0.02em;
+  text-shadow: 0 2px 10px rgba(9, 16, 58, 0.28);
 }
 
 .logo-text span {
-  margin-top: 6px;
-  color: rgba(246, 246, 255, 0.9);
-  font-size: 1.15rem;
+  margin-top: 5px;
+  color: rgba(241, 247, 255, 0.96);
+  font-size: clamp(0.95rem, 0.72rem + 0.5vw, 1.25rem);
   font-weight: 500;
+  text-shadow: 0 2px 10px rgba(9, 16, 58, 0.24);
+}
+
+@media (max-width: 720px) {
+  .logo-mark {
+    width: 72px;
+    height: 72px;
+  }
 }
 </style>
